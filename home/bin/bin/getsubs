@@ -91,6 +91,20 @@ function vttLines(vtt: string): Iterable<string> {
   return removeConsecutiveDuplicates(rawResultLines);
 }
 
+async function checkYtDlpInstalled(): Promise<boolean> {
+  try {
+    const cmd = new Deno.Command("yt-dlp", {
+      args: ["--version"],
+      stdout: "null",
+      stderr: "null",
+    });
+    const { code } = await cmd.output();
+    return code === 0;
+  } catch {
+    return false;
+  }
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(Deno.args, {
     string: ["lang"],
@@ -99,6 +113,13 @@ async function main(): Promise<void> {
 
   if (args._.length !== 1) {
     console.error("usage: getsubs [--lang=<language>] <url>");
+    Deno.exit(1);
+  }
+
+  const isInstalled = await checkYtDlpInstalled();
+  if (!isInstalled) {
+    console.error("error: yt-dlp is not installed");
+    console.error("please install yt-dlp to use this script");
     Deno.exit(1);
   }
 
