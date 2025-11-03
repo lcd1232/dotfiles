@@ -1,142 +1,189 @@
-#!/usr/bin/env -S deno run --allow-run --allow-read --allow-write
-import * as path from "jsr:@std/path";
-import * as webvttModule from "npm:webvtt-parser";
-import { parseArgs } from "jsr:@std/cli/parse-args";
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "yt-dlp[default,curl-cffi]>=2024.0.0",
+#     "webvtt-py>=0.5.0",
+# ]
+# ///
 
-const { WebVTTParser } = webvttModule.default;
+import argparse
+import os
+import re
+import sys
+import tempfile
+from typing import Iterable, Optional
 
-async function getVtt(
-  url: string,
-  arg: "--write-sub" | "--write-auto-sub",
-  lang: string,
-): Promise<null | string> {
-  const tempDir = await Deno.makeTempDir();
+import webvtt
+from yt_dlp import YoutubeDL
+from yt_dlp.networking.impersonate import ImpersonateTarget
 
-  try {
-    const cmd = new Deno.Command("yt-dlp", {
-      args: [
-        "--skip-download",
-        arg,
-        "--sub-lang",
-        lang,
-        "--sub-format",
-        "vtt",
-        "-o",
-        path.join(tempDir, "%(id)s.%(ext)s"),
-        url,
-      ],
-      stdout: "piped",
-      stderr: "inherit",
-    });
 
-    const { code } = await cmd.output();
-    if (code !== 0) throw new Error(`yt-dlp command failed with code ${code}`);
+def get_vtt(url: str, subtitle_type: str, lang: str) -> Optional[str]:
+    """
+    Download VTT subtitles using yt-dlp library.
 
-    for await (const entry of Deno.readDir(tempDir)) {
-      if (!entry.name.endsWith(".vtt")) continue;
+    Args:
+        url: Video URL
+        subtitle_type: Either "subtitles" for manual or "automatic_captions" for auto-generated
+        lang: Language code
+    """
+    temp_dir = tempfile.mkdtemp()
 
-      const vttPath = path.join(tempDir, entry.name);
-      return await Deno.readTextFile(vttPath);
+    try:
+        ydl_opts = {
+            "skip_download": True,
+            "writesubtitles": subtitle_type == "subtitles",
+            "writeautomaticsub": subtitle_type == "automatic_captions",
+            "subtitleslangs": [lang],
+            "subtitlesformat": "vtt",
+            "outtmpl": os.path.join(temp_dir, "%(id)s.%(ext)s"),
+            "quiet": True,
+            "no_warnings": True,
+            "impersonate": ImpersonateTarget("chrome"),
+        }
+
+        with YoutubeDL(ydl_opts) as ydl:
+            try:
+                ydl.download([url])
+            except Exception:
+                return None
+
+        # Find and read the .vtt file
+        for filename in os.listdir(temp_dir):
+            if filename.endswith(".vtt"):
+                vtt_path = os.path.join(temp_dir, filename)
+                with open(vtt_path, "r", encoding="utf-8") as f:
+                    return f.read()
+
+        return None
+    finally:
+        import shutil
+
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def remove_consecutive_duplicates(items: list[str]) -> Iterable[str]:
+    """Remove consecutive duplicate items from a list."""
+    previous = None
+    for item in items:
+        if item != previous:
+            yield item
+        previous = item
+
+
+def vtt_lines(vtt_content: str) -> Iterable[str]:
+    """
+    Convert a VTT string to a list of lines.
+
+    YouTube's subtitles have some weirdnesses which this function tries to
+    handle. It probably doesn't do it perfectly.
+    """
+    # Write VTT content to a temporary file since webvtt-py reads from files
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".vtt", delete=False) as f:
+        f.write(vtt_content)
+        temp_path = f.name
+
+    try:
+        vtt_data = webvtt.read(temp_path)
+
+        raw_lines = []
+        for caption in vtt_data:
+            text = caption.text.strip()
+            if text:
+                # Remove multiple spaces and semicolons pattern
+                text = re.sub(r"(?:\s+;)*", "", text)
+                raw_lines.append(text)
+
+        # Split by newlines and filter empty lines
+        all_lines = []
+        for line in raw_lines:
+            for subline in line.split("\n"):
+                subline = subline.strip()
+                if subline:
+                    all_lines.append(subline)
+
+        return remove_consecutive_duplicates(all_lines)
+    finally:
+        os.unlink(temp_path)
+
+
+def get_available_subtitles(url: str) -> dict[str, list[str]]:
+    """
+    Get available subtitle languages for a URL.
+
+    Returns:
+        Dictionary with 'manual' and 'auto' keys containing language lists
+    """
+    ydl_opts = {
+        "skip_download": True,
+        "quiet": True,
+        "no_warnings": True,
     }
 
-    return null;
-  } finally {
-    await Deno.remove(tempDir, { recursive: true });
-  }
-}
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
 
-type VttCue = { type: "text"; value: string } & {
-  type: unknown;
-  children?: VttCue[];
-};
+            manual_subs = list(info.get("subtitles", {}).keys())
+            auto_subs = list(info.get("automatic_captions", {}).keys())
 
-const getVttCueText = ({ children = [] }: Readonly<VttCue>): string => (
-  children.reduce((result, child) => {
-    if (child.type === "text") result += child.value;
-    if (child.children) result += getVttCueText(child);
-    return result;
-  }, "")
-);
+            return {
+                "manual": manual_subs,
+                "auto": auto_subs,
+            }
+    except Exception as e:
+        print(f"error: failed to fetch video info: {e}", file=sys.stderr)
+        return {"manual": [], "auto": []}
 
-function* removeConsecutiveDuplicates<T>(list: ReadonlyArray<T>): Iterable<T> {
-  // This doesn't work if `T` includes `undefined`, but that's not relevant for
-  // this script.
-  let previous: undefined | T;
-  for (const el of list) {
-    if (el !== previous) yield el;
-    previous = el;
-  }
-}
 
-/**
- * Convert a VTT string to a list of lines.
- *
- * YouTube's subtitles have some weirdnesses which this function tries to
- * handle. It probably doesn't do it perfectly.
- */
-function vttLines(vtt: string): Iterable<string> {
-  const parser = new WebVTTParser();
-  const tree = parser.parse(vtt, "metadata");
+def main() -> None:
+    """Main entry point."""
+    parser = argparse.ArgumentParser(
+        description="Download and extract YouTube subtitles"
+    )
+    parser.add_argument("url", help="Video URL")
+    parser.add_argument(
+        "--lang",
+        default="en",
+        help="Subtitle language code (default: en)",
+    )
 
-  let rawResult: string = "";
-  for (const cue of tree.cues) {
-    rawResult += getVttCueText(cue.tree).trim() + "\n";
-  }
+    args = parser.parse_args()
 
-  const rawResultLines = rawResult
-    .split(/\r?\n/g)
-    .map((line) => line.trim().replace(/(?:\s+;)*/g, ""))
-    .filter(Boolean);
+    url = args.url
+    lang = args.lang
 
-  return removeConsecutiveDuplicates(rawResultLines);
-}
+    available = get_available_subtitles(url)
+    all_langs = set(available["manual"] + available["auto"])
 
-async function checkYtDlpInstalled(): Promise<boolean> {
-  try {
-    const cmd = new Deno.Command("yt-dlp", {
-      args: ["--version"],
-      stdout: "null",
-      stderr: "null",
-    });
-    const { code } = await cmd.output();
-    return code === 0;
-  } catch {
-    return false;
-  }
-}
+    if not all_langs:
+        print("error: could not fetch available subtitles", file=sys.stderr)
+        sys.exit(1)
 
-async function main(): Promise<void> {
-  const args = parseArgs(Deno.args, {
-    string: ["lang"],
-    default: { lang: "en" },
-  });
+    if lang not in all_langs:
+        print(
+            f"error: subtitles not available for language '{lang}'",
+            file=sys.stderr,
+        )
+        print(f"available languages: {', '.join(sorted(all_langs))}", file=sys.stderr)
+        sys.exit(1)
 
-  if (args._.length !== 1) {
-    console.error("usage: getsubs [--lang=<language>] <url>");
-    Deno.exit(1);
-  }
+    # Try manual subtitles first, then auto-generated
+    vtt_content = None
+    if lang in available["manual"]:
+        vtt_content = get_vtt(url, "subtitles", lang)
 
-  const isInstalled = await checkYtDlpInstalled();
-  if (!isInstalled) {
-    console.error("error: yt-dlp is not installed");
-    console.error("please install yt-dlp to use this script");
-    Deno.exit(1);
-  }
+    if not vtt_content and lang in available["auto"]:
+        vtt_content = get_vtt(url, "automatic_captions", lang)
 
-  const url = String(args._[0]);
-  const lang = args.lang;
+    if not vtt_content:
+        print("no subs found", file=sys.stderr)
+        sys.exit(1)
 
-  const vtt = await getVtt(url, "--write-sub", lang) ||
-    await getVtt(url, "--write-auto-sub", lang);
+    for line in vtt_lines(vtt_content):
+        print(line)
 
-  if (!vtt) {
-    console.error("no subs found");
-    Deno.exit(1);
-  }
 
-  for (const line of vttLines(vtt)) {
-    console.log(line);
-  }
-}
-
-await main();
+if __name__ == "__main__":
+    main()
