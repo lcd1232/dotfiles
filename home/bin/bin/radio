@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+if [ $# -eq 0 ]; then
+  echo "Usage: radio [station]"
+  echo ""
+  echo "Available stations:"
+  echo "  lofi   - Lo-fi hip hop radio"
+  echo "  trance - HBR1 Trance"
+  echo "  salsa  - Latina Salsa"
+  echo "  kfai   - KFAI Radio"
+  echo "  europaplus - Europa Plus"
+  exit 0
+fi
+
+if [ "$1" == lofi ]; then
+  url='https://live.hunter.fm/lofi_low'
+elif [ "$1" == trance ]; then
+  url='http://ubuntu.hbr1.com:19800/trance.ogg'
+elif [ "$1" == salsa ]; then
+  url='https://latinasalsa.ice.infomaniak.ch/latinasalsa.mp3'
+elif [ "$1" == kfai ]; then
+  url='https://kfai.broadcasttool.stream/kfai-1'
+elif [ "$1" == europaplus ]; then
+  url='https://hls-01-regions.emgsound.ru/11_msk/playlist.m3u8'
+else
+  echo "don't know $1" 1>&2
+  exit 1
+fi
+
+exec mpv --really-quiet "$url"
