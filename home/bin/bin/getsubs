@@ -1,12 +1,14 @@
 #!/usr/bin/env -S deno run --allow-run --allow-read --allow-write
 import * as path from "jsr:@std/path";
 import * as webvttModule from "npm:webvtt-parser";
+import { parseArgs } from "jsr:@std/cli/parse-args";
 
 const { WebVTTParser } = webvttModule.default;
 
 async function getVtt(
   url: string,
   arg: "--write-sub" | "--write-auto-sub",
+  lang: string,
 ): Promise<null | string> {
   const tempDir = await Deno.makeTempDir();
 
@@ -16,7 +18,7 @@ async function getVtt(
         "--skip-download",
         arg,
         "--sub-lang",
-        "ru",
+        lang,
         "--sub-format",
         "vtt",
         "-o",
@@ -90,20 +92,21 @@ function vttLines(vtt: string): Iterable<string> {
 }
 
 async function main(): Promise<void> {
-  const [url, ...rest] = Deno.args;
+  const args = parseArgs(Deno.args, {
+    string: ["lang"],
+    default: { lang: "en" },
+  });
 
-  if (rest.length) {
-    console.error("too many args");
+  if (args._.length !== 1) {
+    console.error("usage: getsubs [--lang=<language>] <url>");
     Deno.exit(1);
   }
 
-  if (!url) {
-    console.error("needs a URL");
-    Deno.exit(1);
-  }
+  const url = String(args._[0]);
+  const lang = args.lang;
 
-  const vtt = await getVtt(url, "--write-sub") ||
-    await getVtt(url, "--write-auto-sub");
+  const vtt = await getVtt(url, "--write-sub", lang) ||
+    await getVtt(url, "--write-auto-sub", lang);
 
   if (!vtt) {
     console.error("no subs found");
