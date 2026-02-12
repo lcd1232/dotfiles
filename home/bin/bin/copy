@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 set -u
+set -o pipefail
 
 if hash pbcopy 2>/dev/null; then
   exec pbcopy
@@ -16,4 +17,3 @@ else
     cat "$1" > /tmp/clipboard
   fi
 fi
-
