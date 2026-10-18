@@ -1,0 +1,13 @@
+# Managed by Strata. Unlock encrypted volumes. Do not edit this header.
+program_options:
+  event_hook:
+  - /home/lcd1232/.local/bin/strata
+  - --udiskie-hook
+  - '{event}'
+  - '{id_usage}'
+  - '{device_file}'
+  - '{id_uuid}'
+  password_prompt: false
+device_config:
+- is_luks: true
+  automount: false

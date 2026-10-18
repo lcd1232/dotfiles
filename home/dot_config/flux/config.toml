@@ -1,0 +1,18 @@
+# Flux configuration. fluxd reloads this file on SIGHUP.
+
+name = ""
+download_dir = ""
+auto_clipboard = true
+notifications = true
+share_home = true
+pause_media_on_call = true
+sync_dnd = true
+herdr = true
+herdr_control = true
+herdr_terminals = false
+remote_input = true
+remote_desktop = true
+check_updates = true
+approve_timeout = 0
+clipboard_limit = 0
+commands = []

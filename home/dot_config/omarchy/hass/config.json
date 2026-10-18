@@ -1,0 +1,52 @@
+{
+  "baseUrl": "http://pi.zerotier.lcd1232.com:8123",
+  "localUrl": "",
+  "trustedNetwork": "",
+  "demoMode": false,
+  "favorites": [
+    "climate.hisense_ac",
+    "camera.tigrana_petrosiana_18_p_3_camera",
+    "button.tigrana_petrosiana_18_p_3_open_door"
+  ],
+  "demoFavorites": [
+    "light.living_room_lamp",
+    "fan.living_room_ceiling_fan",
+    "climate.living_room_thermostat",
+    "media_player.living_room_tv",
+    "scene.living_room_movie_night",
+    "cover.living_room_blinds",
+    "light.kitchen_pendant",
+    "switch.kitchen_coffee_maker",
+    "sensor.kitchen_temperature",
+    "cover.garage_door",
+    "lock.garage_side_door"
+  ],
+  "roomReadings": [],
+  "demoRoomReadings": [],
+  "pinnedRoomReadings": [],
+  "demoPinnedRoomReadings": [],
+  "panelOrder": [
+    "climate.hisense_ac",
+    "camera.tigrana_petrosiana_18_p_3_camera",
+    "button.tigrana_petrosiana_18_p_3_open_door"
+  ],
+  "demoPanelOrder": [
+    "light.living_room_lamp",
+    "fan.living_room_ceiling_fan",
+    "climate.living_room_thermostat",
+    "media_player.living_room_tv",
+    "scene.living_room_movie_night",
+    "cover.living_room_blinds",
+    "light.kitchen_pendant",
+    "switch.kitchen_coffee_maker",
+    "sensor.kitchen_temperature",
+    "cover.garage_door",
+    "lock.garage_side_door"
+  ],
+  "groupByArea": false,
+  "showEntityIcons": true,
+  "showPanelPinOnHover": false,
+  "selectedTab": "favorites",
+  "displayNameOverrides": {},
+  "iconOverrides": {}
+}

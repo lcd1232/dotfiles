@@ -1,0 +1,6 @@
+version = 1
+active = 0
+
+[[tabs]]
+kind = "path"
+value = "/home/lcd1232/Downloads/Telegram Desktop"
