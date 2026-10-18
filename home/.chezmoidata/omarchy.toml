@@ -1,0 +1,5 @@
+# Omarchy keeps the selected theme and wallpaper in ~/.local/state, not in a config file,
+# so we store the choice here and apply it with run_onchange_after_omarchy-theme.sh.tmpl.
+[omarchy]
+theme = "Wheel Of Time"
+background = "00-serpent-and-wheel.jpg"

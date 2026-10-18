@@ -1,0 +1,13 @@
+{{ if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
+#!/usr/bin/env bash
+# Re-runs whenever the selected theme or the theme files below change.
+# theme: {{ .omarchy.theme }} / {{ .omarchy.background }}
+# colors.toml: {{ include "dot_config/omarchy/themes/wheel-of-time/colors.toml" | sha256sum }}
+# hyprland.lua: {{ include "dot_config/omarchy/themes/wheel-of-time/hyprland.lua" | sha256sum }}
+set -euo pipefail
+
+# `theme set` regenerates ~/.local/state/omarchy/current/theme and resets the wallpaper,
+# so the background has to be set afterwards.
+omarchy theme set {{ .omarchy.theme | quote }}
+omarchy theme bg set "$HOME/.local/state/omarchy/current/theme/backgrounds/{{ .omarchy.background }}"
+{{ end -}}

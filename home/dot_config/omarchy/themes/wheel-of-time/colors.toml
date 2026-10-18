@@ -1,0 +1,36 @@
+# Wheel of Time — ink-black night, parchment text, Great Serpent gold,
+# and the colours of the seven Ajahs.
+mode = "dark"
+
+accent = "#d4a64a"
+selection = "#3a2f22"
+muted = "#4a4038"
+
+background = "#16130f"
+dark_background = "#110f0c"
+darker_background = "#0b0a08"
+lighter_background = "#221d17"
+
+foreground = "#d8cba8"
+dark_foreground = "#8a7c62"
+light_foreground = "#e6dbbd"
+bright_foreground = "#f3ead2"
+
+active_border_color = "#d4a64a"
+active_tab_background = "#d4a64a"
+
+red = "#c4483e"
+yellow = "#d9b44a"
+orange = "#d9823b"
+green = "#7c9a5a"
+cyan = "#6fa39a"
+blue = "#5f86b5"
+magenta = "#a77aa8"
+brown = "#8b6a45"
+
+bright_red = "#e0645a"
+bright_yellow = "#f0cd6a"
+bright_green = "#9fbd78"
+bright_cyan = "#8cc2b8"
+bright_blue = "#82a7d2"
+bright_magenta = "#c49ac4"
