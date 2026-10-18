@@ -1,0 +1,23 @@
+{{ if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
+#!/usr/bin/env bash
+# System-level tweaks that live outside $HOME. Reruns when this file changes.
+set -euo pipefail
+
+# Wake from suspend via the ACPI RTC alarm.
+conf=/etc/limine-entry-tool.d/rtc-alarm.conf
+line='KERNEL_CMDLINE[default]+=" rtc_cmos.use_acpi_alarm=1"'
+if [[ "$(cat "$conf" 2>/dev/null)" != "$line" ]]; then
+  echo "$line" | sudo tee "$conf" >/dev/null
+  sudo limine-update
+fi
+
+sudo systemctl enable --now zerotier-one.service
+
+# User services from packages installed above, plus voxtype's own unit in ~/.config/systemd/user.
+systemctl --user daemon-reload
+for unit in fluxd.service hyprmoncfgd.service voxtype.service; do
+  if systemctl --user cat "$unit" &>/dev/null; then
+    systemctl --user enable --now "$unit"
+  fi
+done
+{{ end -}}

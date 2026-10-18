@@ -1,0 +1,7 @@
+{{ if lookPath "mise" -}}
+#!/usr/bin/env bash
+# Installs the global tools listed in ~/.config/mise/config.toml.
+# config hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
+set -euo pipefail
+mise install
+{{ end -}}
