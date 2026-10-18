@@ -1,0 +1,44 @@
+# Packages installed on top of a stock Omarchy install (from `pacman -Qqe` minus
+# Omarchy's package lists and base-system packages). Installed by
+# run_onchange_before_10-packages.sh.tmpl.
+[packages]
+repo = [
+  "android-tools",
+  "ayatana-ido",
+  "bind",
+  "calf",
+  "dbeaver",
+  "dcraw",
+  "discord",
+  "easyeffects",
+  "fprintd",
+  "fuse2",
+  "fwupd",
+  "glib2-devel",
+  "google-chrome",
+  "gst-libav",
+  "gtksourceview5",
+  "jadx",
+  "kubectl",
+  "libayatana-indicator",
+  "libfprint-git",
+  "omazed",
+  "readest",
+  "uv",
+  "v4l2loopback-dkms",
+  "vim",
+  "voxtype-bin",
+  "zed",
+  "zen-browser-bin",
+  "zerotier-one",
+]
+aur = [
+  "appmanager",
+  "betterbird-bin",
+  "ente-auth-bin",
+  "goland",
+  "goland-jre",
+  "hyprmoncfg-bin",
+  "omarchy-flux",
+  "telegram-desktop-bin",
+]

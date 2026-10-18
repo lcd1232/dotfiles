@@ -1,0 +1,26 @@
+# Omarchy bar plugins installed from git. chezmoi clones them on a new machine
+# and pulls updates on `chezmoi apply --refresh-externals`.
+{{ if eq .chezmoi.os "linux" -}}
+{{- $plugins := dict
+  "crmne.hyprmoncfg" "https://github.com/crmne/omarchy-hyprmoncfg.git"
+  "io.github.camilolunacom.restreminder" "https://github.com/camilolunacom/omarchy-restreminder.git"
+  "jwhall.omanodes" "https://github.com/jwhall/omarchy-omanodes.git"
+  "kenny.nightlight" "https://github.com/key-tone/omarchy-nightlight.git"
+  "lcd1232.ente-auth" "https://github.com/lcd1232/omarchy-totp.git"
+  "njpatel.omapager" "https://github.com/njpatel/omapager.git"
+}}
+{{- range $id, $url := $plugins }}
+[".config/omarchy/plugins/{{ $id }}"]
+type = "git-repo"
+url = "{{ $url }}"
+refreshPeriod = "168h"
+{{ end }}
+# My own plugins, developed in place; the plugin dirs symlink to these checkouts.
+["Work/hass"]
+type = "git-repo"
+url = "git@github.com:lcd1232/hass.git"
+
+["Projects/lcd1232/omashare"]
+type = "git-repo"
+url = "git@github.com:lcd1232/omashare.git"
+{{- end }}

@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "idle": {
+    "screensaver": 150,
+    "lock": 300
+  },
+  "bar": {
+    "position": "top",
+    "transparent": true,
+    "centerAnchor": "lcd1232.clock",
+    "layout": {
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        }
+      ],
+      "center": [
+        {
+          "id": "omarchy.indicators",
+          "items": [
+            "Dictation",
+            "ScreenRecording",
+            "Reminder",
+            "Dnd",
+            "StayAwake"
+          ]
+        },
+        {
+          "id": "njpatel.omapager"
+        },
+        {
+          "id": "lcd1232.clock",
+          "format": "dddd HH:mm:ss",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "id": "kenny.nightlight"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
+      ],
+      "right": [
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "crmne.hyprmoncfg"
+        },
+        {
+          "id": "io.github.camilolunacom.restreminder"
+        },
+        {
+          "id": "lcd1232.omashare",
+          "audio": "tv",
+          "fps": 60,
+          "maxResolution": "1920x1080",
+          "shareSource": "monitor",
+          "showCursor": true
+        },
+        {
+          "id": "lcd1232.ente-auth"
+        },
+        {
+          "id": "flux"
+        },
+        {
+          "id": "jwhall.omanodes"
+        },
+        {
+          "id": "hass"
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "omarchy.power"
+        }
+      ]
+    }
+  },
+  "plugins": [],
+  "disabledPlugins": [
+    "omarchy.notifications",
+    "omarchy.nightlight"
+  ],
+  "cloneSourceRestores": [
+    "kenny.nightlight"
+  ]
+}

@@ -1,0 +1,8 @@
+{{ if and (eq .chezmoi.os "linux") (lookPath "omarchy") -}}
+#!/usr/bin/env bash
+# Installs packages from .chezmoidata/packages.toml. Reruns when the list changes.
+set -euo pipefail
+
+omarchy pkg add {{ .packages.repo | join " " }}
+omarchy pkg aur add {{ .packages.aur | join " " }}
+{{ end -}}
